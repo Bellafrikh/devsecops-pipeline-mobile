@@ -1,0 +1,54 @@
+version: "1.0"
+name: "Default Security Policy"
+description: "Standard mobile security policy. Critical=0 blocks the pipeline."
+
+thresholds:
+  critical: 0       # Any critical finding → FAIL (gate blocks)
+  high: 5           # More than 5 high → FAIL
+  medium: 20        # More than 20 medium → WARN
+  low: 50           # Informational only
+
+scanners:
+  mobsf:
+    enabled: true
+    fail_on_score_below: 40   # MobSF security score 0-100
+  sbom:
+    enabled: true
+    fail_on_critical_cve: true
+    fail_on_high_cve: false
+  secret_hunter:
+    enabled: true
+    block_on_any_secret: true  # Any secret found → FAIL
+    entropy_threshold: 4.5
+    patterns:
+      - AWS_KEY
+      - GOOGLE_API
+      - PRIVATE_KEY
+      - PASSWORD_HARDCODED
+      - JWT_SECRET
+      - DATABASE_URL
+  crypto_lint:
+    enabled: true
+    severity: warn             # weak crypto → WARN (not block)
+    blocked_algorithms:
+      - MD5
+      - SHA1
+      - DES
+      - RC4
+      - ECB_MODE
+    warn_algorithms:
+      - SHA256_without_salt
+      - STATIC_IV
+
+ai_triage:
+  enabled: true
+  deduplication: true
+  auto_group: true
+  ticket_auto_create: true
+  release_notes: true
+  model: "llama3"             # Ollama model (change to "gpt-4" for OpenAI)
+
+notifications:
+  on_fail: true
+  on_warn: false
+  on_pass: false

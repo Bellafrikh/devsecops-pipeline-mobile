@@ -1,0 +1,84 @@
+version: "3.9"
+
+services:
+  # ── MobSF Static Analysis ──────────────────────────────────────────────
+  mobsf:
+    image: opensecurity/mobile-security-framework-mobsf:latest
+    container_name: devsecops-mobsf
+    ports:
+      - "8001:8000"
+    volumes:
+      - mobsf_data:/home/mobsf/.MobSF
+    environment:
+      - MOBSF_API_KEY_FILE=/run/secrets/mobsf_key
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ── Ollama (Local LLM) ────────────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: devsecops-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  # ── Backend API ───────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: devsecops-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:////data/devsecops.db
+      - MOBSF_URL=http://mobsf:8000
+      - MOBSF_API_KEY=${MOBSF_API_KEY:-}
+      - OLLAMA_URL=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3}
+      - AI_PROVIDER=${AI_PROVIDER:-ollama}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GITHUB_TOKEN=${GITHUB_TOKEN:-}
+      - WORKSPACE_DIR=/tmp/devsecops-workspace
+      - CORS_ORIGINS=http://localhost:5173,http://localhost:80,http://localhost:3000
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-change-me}
+      - ANDROID_HOME=/opt/android-sdk
+    volumes:
+      - backend_data:/data
+      - gradle_cache:/root/.gradle
+      - /tmp/devsecops-workspace:/tmp/devsecops-workspace
+      - /home/iilhamm/Android/Sdk:/opt/android-sdk
+      - ./backend:/app
+    depends_on:
+      mobsf:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Frontend ──────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: devsecops-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mobsf_data:
+  ollama_data:
+  backend_data:
+  gradle_cache:

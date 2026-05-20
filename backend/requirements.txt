@@ -1,0 +1,22 @@
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+websockets==12.0
+sqlalchemy==2.0.30
+aiosqlite==0.20.0
+pydantic==2.7.1
+pydantic-settings==2.3.1
+httpx==0.27.0
+python-multipart==0.0.9
+aiofiles==23.2.1
+gitpython==3.1.43
+pyyaml==6.0.1
+requests==2.32.3
+# AI / ML
+ollama==0.2.1
+openai==1.35.3
+scikit-learn==1.5.0
+numpy==1.26.4
+# Security scanning
+# (syft, grype, apktool are installed in Dockerfile as CLI tools)
+python-magic==0.4.27
+entropy==0.1.1
