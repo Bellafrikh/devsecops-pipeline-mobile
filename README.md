@@ -1,6 +1,6 @@
 # Plateforme Mobile DevSecOps
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20318600.svg)](https://doi.org/10.5281/zenodo.20318600)
+ DOI: 10.5281/zenodo.20318600
 
 ## Aperçu
 La **Plateforme Mobile DevSecOps** est un framework d'orchestration automatisé de bout en bout, conçu pour intégrer la sécurité directement dans le cycle de vie du développement d'applications mobiles (**Android, Flutter et React Native**). Inspirée de Jenkins Blue Ocean et entièrement conçue à partir de zéro, elle combine des outils d'analyse statique et binaire aux standards de l'industrie avec un tableau de bord interactif moderne et un système avancé de triage par Intelligence Artificielle (IA) locale ou distante.
